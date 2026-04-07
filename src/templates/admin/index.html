@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="stats-grid">
+  <div class="stat-card"><div class="stat-value">{{ stats.nb_users }}</div><div class="stat-label">Utilisateurs</div></div>
+  <div class="stat-card"><div class="stat-value">{{ stats.nb_produits }}</div><div class="stat-label">Produits en base</div></div>
+  <div class="stat-card"><div class="stat-value">{{ stats.nb_logs }}</div><div class="stat-label">Entrées journal</div></div>
+</div>
+<div style="display:flex;gap:12px;margin-bottom:20px">
+  <a href="{{ url_for('admin.users') }}" class="btn btn-primary">👤 Gérer les utilisateurs</a>
+  <a href="{{ url_for('admin.logs') }}" class="btn btn-secondary">📋 Journal complet</a>
+</div>
+<div class="card">
+  <div class="card-header">📋 Dernières actions (20)</div>
+  <div class="card-body" style="padding:0">
+    <table>
+      <thead><tr><th>Date</th><th>Utilisateur</th><th>Action</th><th>IP</th></tr></thead>
+      <tbody>
+      {% for l in logs %}
+      <tr>
+        <td style="font-size:12px">{{ l.timestamp.strftime('%d/%m %H:%M') }}</td>
+        <td>{{ l.username or '—' }}</td>
+        <td>{{ l.action }}</td>
+        <td style="font-size:12px;color:#888">{{ l.ip_address or '—' }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

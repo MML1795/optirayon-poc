@@ -1,0 +1,88 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# config.yaml — Configuration de l'application Non-Détention Produit
+# Mémoire Marielle Ladhari — SARL SYRALIYACOM Distribution / Carrefour Express
+# ═══════════════════════════════════════════════════════════════════════════════
+
+app:
+  name: "Non-Détention Produit — SYRALIYACOM"
+  version: "1.0.0"
+  description: "Application d'aide à la décision — Priorisation des produits non détenus"
+  debug: false          # Mettre à true uniquement en développement
+  host: "0.0.0.0"
+  port: 5000
+  url_base: "http://syraliyacom-nondetention.local:5000"
+
+# ─── Base de données ──────────────────────────────────────────────────────────
+database:
+  type: "sqlite"        # sqlite | postgresql (production)
+  path: "data/nondetention.db"
+  # Pour PostgreSQL en production :
+  # host: "localhost"
+  # port: 5432
+  # name: "nondetention_db"
+  # user: "nondetention_user"
+  echo_sql: false       # Mettre à true pour debugger les requêtes SQL
+
+# ─── Modèle de Machine Learning ───────────────────────────────────────────────
+model:
+  lasso_path: "models/model_lasso.pkl"
+  scaler_path: "models/scaler.pkl"
+  alpha: 0.5
+  features:
+    - "Nb jours sans ventes"
+    - "Stock UG"
+    - "SMP"
+    - "VMH mag"
+    - "VMH nat"
+    - "CA TTC mag 3 mois"
+  target: "Potentiel gain mensuel"
+  # Colonnes à exclure absolument (data leakage confirmé)
+  exclude_columns:
+    - "CA TTC moy 3 mois Market"   # r=1.00 avec la cible — data leakage
+    - "Barcode"                     # Identifiant produit — non informatif
+  train_test_split: 0.30
+  random_state: 42
+  metrics:
+    r2_test: 0.353
+    rmse: 198.8
+    mae: 133.6
+    mse: 39521.4
+
+# ─── Données source ────────────────────────────────────────────────────────────
+data:
+  csv_path: "data/Détention Market simplifiée - top 500 M2M_DNP.csv"
+  encoding: "utf-8"
+  separator: ","
+  colonnes:
+    rayon: "Rayon"
+    famille: "Famille"
+    target: "Potentiel gain mensuel"
+    jours_sans_vente: "Nb jours sans ventes"
+
+# ─── Interface utilisateur ─────────────────────────────────────────────────────
+ui:
+  items_per_page: 25          # Nombre de produits par page dans la liste
+  top_produits_dashboard: 10  # Nb produits affichés sur le tableau de bord
+  seuil_priorite_haute: 500   # € — produits au-dessus = priorité absolue (rouge)
+  seuil_priorite_moyenne: 200 # € — produits au-dessus = priorité haute (orange)
+  devise: "€"
+  langue: "fr"
+
+# ─── Sécurité ─────────────────────────────────────────────────────────────────
+security:
+  session_lifetime_minutes: 60
+  max_login_attempts: 5
+  lockout_duration_minutes: 15
+  bcrypt_rounds: 12
+
+# ─── Journalisation ───────────────────────────────────────────────────────────
+logging:
+  level: "INFO"       # DEBUG | INFO | WARNING | ERROR
+  file: "logs/app.log"
+  max_bytes: 10485760 # 10 MB
+  backup_count: 5
+
+# ─── Export ───────────────────────────────────────────────────────────────────
+export:
+  csv_encoding: "utf-8-sig"    # utf-8-sig pour compatibilité Excel
+  max_rows: 10000

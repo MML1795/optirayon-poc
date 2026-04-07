@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<a href="{{ url_for('main.liste') }}" class="btn btn-secondary" style="margin-bottom:16px">← Retour à la liste</a>
+
+<div class="card" style="margin-bottom:20px">
+  <div class="card-header">📦 Informations produit — Barcode {{ produit.barcode or 'N/A' }}</div>
+  <div class="card-body">
+    <div class="detail-grid">
+      <div class="detail-item">
+        <div class="label">Potentiel de gain prédit</div>
+        <div class="value" style="font-size:32px;color:{% if produit.priorite()=='haute' %}#C0392B{% elif produit.priorite()=='moyenne' %}#E07B39{% else %}#2E8B57{% endif %}">
+          {{ "{:,.0f}".format(produit.potentiel_predit) }} €
+        </div>
+      </div>
+      <div class="detail-item">
+        <div class="label">Niveau de priorité</div>
+        <div class="value"><span class="badge badge-{{ produit.priorite() }}" style="font-size:16px;padding:6px 16px">{{ produit.priorite()|upper }}</span></div>
+      </div>
+      <div class="detail-item">
+        <div class="label">Rayon</div>
+        <div class="value" style="font-size:16px">{{ produit.rayon or '—' }}</div>
+      </div>
+      <div class="detail-item">
+        <div class="label">Famille</div>
+        <div class="value" style="font-size:16px">{{ produit.famille or '—' }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">📊 Variables explicatives du modèle Lasso</div>
+  <div class="card-body">
+    <table>
+      <thead><tr><th>Variable</th><th>Valeur</th><th>Rôle dans le modèle</th></tr></thead>
+      <tbody>
+        <tr><td>Nb jours sans ventes</td><td><strong>{{ produit.nb_jours_sans_ventes|int if produit.nb_jours_sans_ventes else '—' }} j</strong></td><td>Durée d'absence en rayon</td></tr>
+        <tr><td>Stock UG</td><td><strong>{{ "%.1f"|format(produit.stock_ug) if produit.stock_ug else '—' }}</strong></td><td>Stock en unité de gestion</td></tr>
+        <tr><td>SMP</td><td><strong>{{ "%.2f"|format(produit.smp) if produit.smp else '—' }} €</strong></td><td>Stock moyen pondéré</td></tr>
+        <tr><td>VMH mag</td><td><strong>{{ "%.1f"|format(produit.vmh_mag) if produit.vmh_mag else '—' }}</strong></td><td>Volume moyen hebdo magasin</td></tr>
+        <tr><td>VMH nat</td><td><strong>{{ "%.1f"|format(produit.vmh_nat) if produit.vmh_nat else '—' }}</strong></td><td>Volume moyen hebdo national</td></tr>
+        <tr><td>CA TTC mag 3 mois</td><td><strong>{{ "{:,.0f}".format(produit.ca_ttc_mag_3mois) if produit.ca_ttc_mag_3mois else '—' }} €</strong></td><td>CA magasin sur 3 mois</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

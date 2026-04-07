@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block content %}
+<form method="GET" class="filtres-bar">
+  <div class="filtre-group">
+    <label>Rayon</label>
+    <select name="rayon"><option value="">Tous</option>
+    {% for r in rayons %}<option value="{{ r }}" {% if r==rayon_filtre %}selected{% endif %}>{{ r }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="filtre-group">
+    <label>Famille</label>
+    <select name="famille"><option value="">Toutes</option>
+    {% for f in familles %}<option value="{{ f }}" {% if f==famille_filtre %}selected{% endif %}>{{ f }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="filtre-group">
+    <label>Seuil min (€)</label>
+    <input type="number" name="seuil" value="{{ seuil_filtre }}" placeholder="ex: 200">
+  </div>
+  <div class="filtre-group">
+    <label>Tri</label>
+    <select name="tri">
+      <option value="predit_desc" {% if tri=='predit_desc' %}selected{% endif %}>Potentiel ↓</option>
+      <option value="predit_asc"  {% if tri=='predit_asc'  %}selected{% endif %}>Potentiel ↑</option>
+      <option value="jours_desc"  {% if tri=='jours_desc'  %}selected{% endif %}>Jours sans vente ↓</option>
+      <option value="famille_asc" {% if tri=='famille_asc' %}selected{% endif %}>Famille A→Z</option>
+    </select>
+  </div>
+  <button type="submit" class="btn btn-primary">Filtrer</button>
+  <a href="{{ url_for('main.liste') }}" class="btn btn-secondary">Réinitialiser</a>
+</form>
+
+<div class="card">
+  <div class="card-header">
+    📋 Produits non détenus
+    <span style="font-size:12px;opacity:.8;margin-left:8px">{{ pagination.total }} résultat(s)</span>
+  </div>
+  <div class="card-body" style="padding:0">
+    <table>
+      <thead><tr>
+        <th>Barcode</th><th>Rayon</th><th>Famille</th>
+        <th>Potentiel prédit</th><th>Jours sans vente</th>
+        <th>VMH nat</th><th>Priorité</th><th></th>
+      </tr></thead>
+      <tbody>
+      {% for p in produits %}
+      <tr>
+        <td style="font-size:12px;color:#888">{{ p.barcode or '—' }}</td>
+        <td>{{ p.rayon or '—' }}</td>
+        <td>{{ p.famille or '—' }}</td>
+        <td><strong>{{ "{:,.0f}".format(p.potentiel_predit) }} €</strong></td>
+        <td>{{ p.nb_jours_sans_ventes|int if p.nb_jours_sans_ventes else '—' }} j</td>
+        <td>{{ "%.1f"|format(p.vmh_nat) if p.vmh_nat else '—' }}</td>
+        <td><span class="badge badge-{{ p.priorite() }}">{{ p.priorite()|upper }}</span></td>
+        <td><a href="{{ url_for('main.detail_produit', pid=p.id) }}" class="btn btn-sm btn-secondary">→</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="8" style="text-align:center;padding:20px;color:#888">Aucun résultat</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% if pagination.pages > 1 %}
+<div class="pagination">
+  {% if pagination.has_prev %}
+  <a class="page-link" href="?page={{ pagination.prev_num }}&rayon={{ rayon_filtre }}&famille={{ famille_filtre }}&seuil={{ seuil_filtre }}&tri={{ tri }}">‹ Préc</a>
+  {% endif %}
+  {% for p in pagination.iter_pages() %}
+    {% if p %}
+    <a class="page-link {% if p==pagination.page %}active{% endif %}" href="?page={{ p }}&rayon={{ rayon_filtre }}&famille={{ famille_filtre }}&seuil={{ seuil_filtre }}&tri={{ tri }}">{{ p }}</a>
+    {% else %}<span class="page-link">…</span>{% endif %}
+  {% endfor %}
+  {% if pagination.has_next %}
+  <a class="page-link" href="?page={{ pagination.next_num }}&rayon={{ rayon_filtre }}&famille={{ famille_filtre }}&seuil={{ seuil_filtre }}&tri={{ tri }}">Suiv ›</a>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

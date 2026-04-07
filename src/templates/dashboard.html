@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-value">{{ stats.nb_produits }}</div>
+    <div class="stat-label">Produits non détenus analysés</div>
+  </div>
+  <div class="stat-card" style="border-color:#C0392B">
+    <div class="stat-value" style="color:#C0392B">{{ stats.nb_haute_priorite }}</div>
+    <div class="stat-label">Priorité absolue (≥ 500 €)</div>
+  </div>
+  <div class="stat-card" style="border-color:#E07B39">
+    <div class="stat-value" style="color:#E07B39">{{ "{:,.0f}".format(stats.gain_moyen) }} €</div>
+    <div class="stat-label">Gain moyen prédit</div>
+  </div>
+  <div class="stat-card" style="border-color:#2E8B57">
+    <div class="stat-value" style="color:#2E8B57">{{ "{:,.0f}".format(stats.gain_total) }} €</div>
+    <div class="stat-label">Potentiel total récupérable</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">🏆 Top 10 — Produits prioritaires</div>
+  <div class="card-body" style="padding:0">
+    <table>
+      <thead><tr>
+        <th>#</th><th>Rayon</th><th>Famille</th>
+        <th>Potentiel prédit</th><th>Jours sans vente</th><th>Priorité</th><th></th>
+      </tr></thead>
+      <tbody>
+      {% for p in top_produits %}
+      <tr>
+        <td><strong>{{ loop.index }}</strong></td>
+        <td>{{ p.rayon or '—' }}</td>
+        <td>{{ p.famille or '—' }}</td>
+        <td><strong>{{ "{:,.0f}".format(p.potentiel_predit) }} €</strong></td>
+        <td>{{ p.nb_jours_sans_ventes|int if p.nb_jours_sans_ventes else '—' }} j</td>
+        <td><span class="badge badge-{{ p.priorite() }}">{{ p.priorite()|upper }}</span></td>
+        <td><a href="{{ url_for('main.detail_produit', pid=p.id) }}" class="btn btn-sm btn-secondary">Détail</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" style="text-align:center;color:#888;padding:20px">
+        Aucune donnée — lancez scripts/init_db.py avec votre fichier CSV
+      </td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div style="text-align:right;margin-top:12px">
+  <a href="{{ url_for('main.liste') }}" class="btn btn-primary">Voir tous les produits →</a>
+  <a href="{{ url_for('main.export_csv') }}" class="btn btn-secondary" style="margin-left:8px">⬇️ Export CSV</a>
+</div>
+{% endblock %}

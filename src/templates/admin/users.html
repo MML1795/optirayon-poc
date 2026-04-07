@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="margin-bottom:16px">
+  <a href="{{ url_for('admin.create_user') }}" class="btn btn-primary">+ Créer un utilisateur</a>
+</div>
+<div class="card">
+  <div class="card-header">👤 Utilisateurs</div>
+  <div class="card-body" style="padding:0">
+    <table>
+      <thead><tr><th>Identifiant</th><th>Email</th><th>Rôle</th><th>Statut</th><th>Dernière connexion</th><th></th></tr></thead>
+      <tbody>
+      {% for u in users %}
+      <tr>
+        <td><strong>{{ u.username }}</strong></td>
+        <td>{{ u.email }}</td>
+        <td>{{ u.role }}</td>
+        <td><span class="badge {% if u.actif %}badge-basse{% else %}badge-haute{% endif %}">{{ 'Actif' if u.actif else 'Inactif' }}</span></td>
+        <td style="font-size:12px">{{ u.derniere_connexion.strftime('%d/%m/%Y %H:%M') if u.derniere_connexion else '—' }}</td>
+        <td><a href="{{ url_for('admin.toggle_user', uid=u.id) }}" class="btn btn-sm {% if u.actif %}btn-danger{% else %}btn-success{% endif %}">
+          {{ 'Désactiver' if u.actif else 'Activer' }}</a></td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

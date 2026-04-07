@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ titre }} SYRALIYACOM{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+  <!-- Barre de navigation -->
+  <nav class="navbar">
+    <div class="navbar-brand">
+      🛒 OptiRayon Carrefour Express
+      <span class="navbar-subtitle">Aide à la décision · IA</span>
+    </div>
+    <div class="navbar-links">
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('main.dashboard') }}" class="nav-link {% if request.endpoint == 'main.dashboard' %}active{% endif %}">
+          📊 Tableau de bord
+        </a>
+        <a href="{{ url_for('main.liste') }}" class="nav-link {% if request.endpoint == 'main.liste' %}active{% endif %}">
+          📋 Produits
+        </a>
+        <a href="{{ url_for('main.export_csv') }}" class="nav-link">
+          ⬇️ Export CSV
+        </a>
+        {% if current_user.is_admin() %}
+        <a href="{{ url_for('admin.index') }}" class="nav-link {% if 'admin' in request.endpoint %}active{% endif %}">
+          ⚙️ Admin
+        </a>
+        {% endif %}
+        <span class="nav-user">👤 {{ current_user.username }}</span>
+        <a href="{{ url_for('auth.logout') }}" class="nav-link nav-logout">Déconnexion</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <!-- Alertes Flash -->
+  <div class="flash-container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+  </div>
+
+  <!-- Contenu principal -->
+  <main class="main-content">
+    <div class="page-header">
+      <h1>{{ titre }}</h1>
+    </div>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    Mémoire fin d'études — Master 2 Data & IA — Marielle Ladhari — RNCP 37137 — 2025–2026
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

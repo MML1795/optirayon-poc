@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="login-container">
+  <div class="login-header">
+    <h2>🔐 Connexion</h2>
+    <p style="font-size:13px;opacity:.8;margin-top:6px">Non-Détention Produit — SYRALIYACOM</p>
+  </div>
+  <div class="login-body">
+    <div class="form-group">
+      <label for="username">Identifiant</label>
+      <form method="POST">
+        <input type="text" name="username" id="username" placeholder="admin" required autofocus>
+    </div>
+    <div class="form-group" style="margin-top:12px">
+      <label for="password">Mot de passe</label>
+      <input type="password" name="password" id="password" placeholder="••••••••" required>
+    </div>
+    <button type="submit" class="btn btn-primary" style="width:100%;margin-top:20px">Se connecter</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
