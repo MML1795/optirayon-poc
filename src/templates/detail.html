@@ -2,8 +2,12 @@
 {% block content %}
 <a href="{{ url_for('main.liste') }}" class="btn btn-secondary" style="margin-bottom:16px">← Retour à la liste</a>
 
+<!-- En-tête produit -->
 <div class="card" style="margin-bottom:20px">
-  <div class="card-header">📦 Informations produit — Barcode {{ produit.barcode or 'N/A' }}</div>
+  <div class="card-header">
+    📦 {{ produit.libelle or 'Produit #' + produit.id|string }}
+    <span style="font-size:12px;opacity:.7;margin-left:8px">Barcode : {{ produit.barcode or 'N/A' }}</span>
+  </div>
   <div class="card-body">
     <div class="detail-grid">
       <div class="detail-item">
@@ -28,7 +32,29 @@
   </div>
 </div>
 
-<div class="card">
+<!-- Statut + changement -->
+<div class="card" style="margin-bottom:20px">
+  <div class="card-header">🎯 Statut du traitement</div>
+  <div class="card-body" style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+    <div>
+      Statut actuel :
+      <span class="badge badge-statut-{{ produit.statut }}" style="font-size:14px;padding:5px 14px">
+        {{ produit.statut_label() }}
+      </span>
+    </div>
+    <form method="POST" action="{{ url_for('main.update_statut', pid=produit.id) }}" style="display:flex;gap:8px;flex-wrap:wrap">
+      <select name="statut" style="padding:6px 10px;border-radius:4px;border:1px solid #ccc">
+        <option value="a_traiter"  {% if produit.statut=='a_traiter' %}selected{% endif %}>À traiter</option>
+        <option value="en_cours"   {% if produit.statut=='en_cours'  %}selected{% endif %}>En cours</option>
+        <option value="traite"     {% if produit.statut=='traite'    %}selected{% endif %}>Traité</option>
+      </select>
+      <button type="submit" class="btn btn-primary btn-sm">Mettre à jour</button>
+    </form>
+  </div>
+</div>
+
+<!-- Variables explicatives -->
+<div class="card" style="margin-bottom:20px">
   <div class="card-header">📊 Variables explicatives du modèle Lasso</div>
   <div class="card-body">
     <table>
@@ -42,6 +68,57 @@
         <tr><td>CA TTC mag 3 mois</td><td><strong>{{ "{:,.0f}".format(produit.ca_ttc_mag_3mois) if produit.ca_ttc_mag_3mois else '—' }} €</strong></td><td>CA magasin sur 3 mois</td></tr>
       </tbody>
     </table>
+  </div>
+</div>
+
+<!-- Commentaires -->
+<div class="card" style="margin-bottom:20px">
+  <div class="card-header">💬 Commentaires ({{ commentaires|length }})</div>
+  <div class="card-body">
+    {% for c in commentaires %}
+    <div style="padding:10px 0;border-bottom:1px solid #f0f0f0">
+      <div style="font-size:12px;color:#888;margin-bottom:4px">
+        <strong>{{ c.username }}</strong> — {{ c.timestamp.strftime('%d/%m/%Y %H:%M') }}
+      </div>
+      <div>{{ c.contenu }}</div>
+    </div>
+    {% else %}
+    <p style="color:#888;font-size:13px">Aucun commentaire pour l'instant.</p>
+    {% endfor %}
+
+    <form method="POST" action="{{ url_for('main.add_commentaire', pid=produit.id) }}" style="margin-top:16px">
+      <div class="form-group">
+        <label style="font-size:12px;font-weight:600;color:#555">Ajouter un commentaire</label>
+        <textarea name="contenu" rows="3" required
+          style="width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;margin-top:6px;font-family:inherit;font-size:13px"
+          placeholder="Votre commentaire..."></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm" style="margin-top:8px">Ajouter</button>
+    </form>
+  </div>
+</div>
+
+<!-- Historique -->
+<div class="card">
+  <div class="card-header">📅 Historique des actions ({{ historique|length }})</div>
+  <div class="card-body" style="padding:0">
+    {% if historique %}
+    <table>
+      <thead><tr><th>Date</th><th>Utilisateur</th><th>Action</th><th>Détail</th></tr></thead>
+      <tbody>
+      {% for h in historique %}
+      <tr>
+        <td style="font-size:12px;white-space:nowrap">{{ h.timestamp.strftime('%d/%m/%Y %H:%M') }}</td>
+        <td>{{ h.username or '—' }}</td>
+        <td>{{ h.action }}</td>
+        <td style="font-size:12px;color:#888">{{ h.detail or '—' }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p style="padding:16px;color:#888;font-size:13px">Aucune action enregistrée.</p>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

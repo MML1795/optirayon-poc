@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}{{ titre }} SYRALIYACOM{% endblock %}</title>
+  <title>{% block title %}{{ titre }} — Non-Détention SYRALIYACOM{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
@@ -11,8 +11,8 @@
   <!-- Barre de navigation -->
   <nav class="navbar">
     <div class="navbar-brand">
-      🛒 OptiRayon Carrefour Express
-      <span class="navbar-subtitle">Aide à la décision · IA</span>
+      🛒 Non-Détention Produit
+      <span class="navbar-subtitle">Carrefour Express — SYRALIYACOM</span>
     </div>
     <div class="navbar-links">
       {% if current_user.is_authenticated %}

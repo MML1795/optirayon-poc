@@ -16,52 +16,35 @@ def create_app(config_path=None):
         config_path = os.path.join(ROOT_DIR, "config.yaml")
     with open(config_path, "r", encoding="utf-8") as f:
         config = yaml.safe_load(f)
-
     app = Flask(__name__,
         template_folder=os.path.join(SRC_DIR, "templates"),
         static_folder=os.path.join(SRC_DIR, "static"))
-
-    # ── Base de données ───────────────────────────────────────────────────────
-    data_dir   = os.path.join(ROOT_DIR, "data")
+    data_dir = os.path.join(ROOT_DIR, "data")
     os.makedirs(data_dir, exist_ok=True)
-    db_file    = os.path.join(data_dir, "nondetention.db")
-    sqlite_uri = "sqlite:///" + db_file.replace("\\", "/")
-
-    # Priorité : variable d'environnement DATABASE_URL > SQLite local
-    db_uri = os.environ.get("DATABASE_URL", sqlite_uri)
-
-    # Render utilise parfois postgres:// au lieu de postgresql://
-    if db_uri.startswith("postgres://"):
-        db_uri = db_uri.replace("postgres://", "postgresql://", 1)
-
+    db_file  = os.path.join(data_dir, "nondetention.db")
+    db_uri   = "sqlite:///" + db_file.replace("\\", "/")
     print(f"[DB] {db_uri}")
-
-    app.config["SECRET_KEY"]              = os.environ.get("SECRET_KEY", "dev-key-syraliyacom-2025")
+    app.config["SECRET_KEY"]              = "dev-key-syraliyacom-2025"
     app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
     app.config["SQLALCHEMY_ECHO"]         = False
     app.config["APP_CONFIG"]              = config
     app.config["ROOT_DIR"]                = ROOT_DIR
-
     db.init_app(app)
     login_manager.init_app(app)
     login_manager.login_view             = "auth.login"
     login_manager.login_message          = "Veuillez vous connecter."
     login_manager.login_message_category = "warning"
-
     from routes.auth  import auth_bp
     from routes.main  import main_bp
     from routes.admin import admin_bp
     app.register_blueprint(auth_bp,  url_prefix="/auth")
     app.register_blueprint(main_bp)
     app.register_blueprint(admin_bp, url_prefix="/admin")
-
     os.makedirs(os.path.join(ROOT_DIR, "logs"), exist_ok=True)
-
     with app.app_context():
-        import models  # noqa
+        import models  # noqa — enregistre les modèles
         db.create_all()
         print("[DB] Tables OK")
-
     return app
 
 @login_manager.user_loader
