@@ -7,7 +7,8 @@ SRC_DIR  = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(SRC_DIR)
 for p in [SRC_DIR, ROOT_DIR]:
     if p not in sys.path: sys.path.insert(0, p)
-load_dotenv(os.path.join(ROOT_DIR, ".env"))
+#load_dotenv(os.path.join(ROOT_DIR, ".env"))
+# load_dotenv désactivé — on utilise les variables d'environnement système
 
 from extensions import db, login_manager
 
@@ -21,10 +22,13 @@ def create_app(config_path=None):
         static_folder=os.path.join(SRC_DIR, "static"))
     data_dir = os.path.join(ROOT_DIR, "data")
     os.makedirs(data_dir, exist_ok=True)
-    db_file  = os.path.join(data_dir, "nondetention.db")
-    db_uri   = "sqlite:///" + db_file.replace("\\", "/")
+    db_file    = os.path.join(data_dir, "nondetention.db")
+    sqlite_uri = "sqlite:///" + db_file.replace("\\", "/")
+    db_uri     = os.environ.get("DATABASE_URL", sqlite_uri)
+    if db_uri.startswith("postgres://"):
+        db_uri = db_uri.replace("postgres://", "postgresql://", 1)
     print(f"[DB] {db_uri}")
-    app.config["SECRET_KEY"]              = "dev-key-syraliyacom-2025"
+    app.config["SECRET_KEY"]              = os.environ.get("SECRET_KEY", "dev-key-syraliyacom-2025")
     app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
     app.config["SQLALCHEMY_ECHO"]         = False
     app.config["APP_CONFIG"]              = config
