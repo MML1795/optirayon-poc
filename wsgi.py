@@ -8,21 +8,20 @@ from extensions import db
 
 app = create_app()
 
-# Création automatique des users au démarrage
 with app.app_context():
-    from models import User
+    from models import User, Produit
     db.create_all()
-    for username, email, role, pwd in [
-        ("admin",          "admin@syraliyacom.fr",  "admin",  "syraliyacom2025!"),
-        ("viewer",         "viewer@syraliyacom.fr", "viewer", "viewer2025"),
-        ("rayon_liquides", "rayon@syraliyacom.fr",  "rayon",  "liquides2025"),
-    ]:
-        if not User.query.filter_by(username=username).first():
+    if User.query.count() == 0:
+        for username, email, role, pwd in [
+            ("admin", "admin@syraliyacom.fr", "admin", "syraliyacom2025!"),
+            ("viewer", "viewer@syraliyacom.fr", "viewer", "viewer2025"),
+            ("rayon_liquides", "rayon@syraliyacom.fr", "rayon", "liquides2025"),
+        ]:
             u = User(username=username, email=email, role=role)
             u.set_password(pwd)
             db.session.add(u)
-            print(f"User cree: {username}")
-    db.session.commit()
+        db.session.commit()
+        print("Users créés")
 
 if __name__ == "__main__":
     app.run()
