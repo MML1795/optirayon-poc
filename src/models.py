@@ -33,9 +33,7 @@ class Produit(db.Model):
     potentiel_gain_mensuel = db.Column(db.Float, nullable=True)
     potentiel_predit       = db.Column(db.Float, nullable=True)
     date_import            = db.Column(db.DateTime, default=datetime.utcnow)
-    # Nouveaux champs
     statut                 = db.Column(db.String(32), nullable=False, default="a_traiter")
-    # statut : a_traiter | en_cours | traite
     commentaires           = db.relationship("Commentaire", backref="produit", lazy="dynamic", cascade="all, delete-orphan")
     historique             = db.relationship("HistoriqueAction", backref="produit", lazy="dynamic", cascade="all, delete-orphan")
 
@@ -46,34 +44,29 @@ class Produit(db.Model):
         return "basse"
 
     def statut_label(self):
-        labels = {"a_traiter": "À traiter", "en_cours": "En cours", "traite": "Traité"}
-        return labels.get(self.statut, "À traiter")
+        return {"a_traiter": "À traiter", "en_cours": "En cours", "traite": "Traité"}.get(self.statut, "À traiter")
 
     def statut_color(self):
-        colors = {"a_traiter": "rouge", "en_cours": "orange", "traite": "vert"}
-        return colors.get(self.statut, "rouge")
-
+        return {"a_traiter": "rouge", "en_cours": "orange", "traite": "vert"}.get(self.statut, "rouge")
 
 class Commentaire(db.Model):
     __tablename__ = "commentaires"
-    id          = db.Column(db.Integer, primary_key=True)
-    produit_id  = db.Column(db.Integer, db.ForeignKey("produits.id"), nullable=False)
-    user_id     = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
-    username    = db.Column(db.String(64), nullable=True)
-    contenu     = db.Column(db.Text, nullable=False)
-    timestamp   = db.Column(db.DateTime, default=datetime.utcnow)
-
+    id         = db.Column(db.Integer, primary_key=True)
+    produit_id = db.Column(db.Integer, db.ForeignKey("produits.id"), nullable=False)
+    user_id    = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+    username   = db.Column(db.String(64), nullable=True)
+    contenu    = db.Column(db.Text, nullable=False)
+    timestamp  = db.Column(db.DateTime, default=datetime.utcnow)
 
 class HistoriqueAction(db.Model):
     __tablename__ = "historique_actions"
-    id          = db.Column(db.Integer, primary_key=True)
-    produit_id  = db.Column(db.Integer, db.ForeignKey("produits.id"), nullable=False)
-    user_id     = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
-    username    = db.Column(db.String(64), nullable=True)
-    action      = db.Column(db.String(128), nullable=False)
-    detail      = db.Column(db.String(512), nullable=True)
-    timestamp   = db.Column(db.DateTime, default=datetime.utcnow)
-
+    id         = db.Column(db.Integer, primary_key=True)
+    produit_id = db.Column(db.Integer, db.ForeignKey("produits.id"), nullable=False)
+    user_id    = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+    username   = db.Column(db.String(64), nullable=True)
+    action     = db.Column(db.String(128), nullable=False)
+    detail     = db.Column(db.String(512), nullable=True)
+    timestamp  = db.Column(db.DateTime, default=datetime.utcnow)
 
 class LogAcces(db.Model):
     __tablename__ = "logs_acces"

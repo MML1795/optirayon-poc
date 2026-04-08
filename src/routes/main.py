@@ -29,45 +29,35 @@ def dashboard():
         "gain_moyen":        round(sum(vals)/len(vals), 0) if vals else 0,
         "nb_haute_priorite": sum(1 for v in vals if v >= cfg["ui"]["seuil_priorite_haute"]),
     }
-
-    # Données graphiques — répartition par rayon
     rayons_data = db.session.query(
         Produit.rayon,
         db.func.count(Produit.id).label("nb"),
         db.func.sum(Produit.potentiel_predit).label("gain_total"),
     ).group_by(Produit.rayon).all()
-
-    # Données graphiques — répartition par statut
     statuts_data = db.session.query(
         Produit.statut,
         db.func.count(Produit.id).label("nb")
     ).group_by(Produit.statut).all()
-
-    # Données graphiques — top 5 familles
     top_familles = db.session.query(
         Produit.famille,
         db.func.sum(Produit.potentiel_predit).label("gain_total")
     ).group_by(Produit.famille)\
      .order_by(desc("gain_total")).limit(5).all()
-
     _log("dashboard")
     return render_template("dashboard.html",
         top_produits=top, stats=stats,
         rayons=rayons_data, statuts_data=statuts_data,
         top_familles=top_familles, titre="Tableau de bord")
 
-
 @main_bp.route("/api/familles")
 @login_required
 def api_familles():
-    """Retourne les familles filtrées par rayon (pour le filtre dynamique)."""
     rayon = request.args.get("rayon", "")
     q = db.session.query(Produit.famille).filter(Produit.famille.isnot(None))
     if rayon:
         q = q.filter(Produit.rayon == rayon)
     familles = sorted(set([f[0] for f in q.distinct().all() if f[0]]))
     return jsonify(familles)
-
 
 @main_bp.route("/liste")
 @login_required
@@ -80,7 +70,6 @@ def liste():
     page   = request.args.get("page", 1, type=int)
     statut = request.args.get("statut", "")
     search = request.args.get("search", "").strip()
-
     q = Produit.query.filter(Produit.potentiel_predit.isnot(None))
     if rayon:  q = q.filter(Produit.rayon == rayon)
     if fam:    q = q.filter(Produit.famille == fam)
@@ -95,7 +84,6 @@ def liste():
                 db.cast(Produit.barcode, db.String).ilike(f"%{search}%")
             )
         )
-
     ordre = {
         "predit_desc":  desc(Produit.potentiel_predit),
         "predit_asc":   asc(Produit.potentiel_predit),
@@ -105,19 +93,15 @@ def liste():
     }
     pag = q.order_by(ordre.get(tri, desc(Produit.potentiel_predit)))\
            .paginate(page=page, per_page=cfg["ui"]["items_per_page"], error_out=False)
-
     rayons_dispo   = sorted(set([r[0] for r in db.session.query(Produit.rayon).distinct().all() if r[0]]))
-    # Familles filtrées selon le rayon sélectionné
     fq = db.session.query(Produit.famille)
     if rayon: fq = fq.filter(Produit.rayon == rayon)
     familles_dispo = sorted(set([f[0] for f in fq.distinct().all() if f[0]]))
-
     return render_template("liste.html", produits=pag.items, pagination=pag,
         rayons=rayons_dispo, familles=familles_dispo,
         rayon_filtre=rayon, famille_filtre=fam, seuil_filtre=seuil,
         statut_filtre=statut, search=search, tri=tri,
         titre="Liste des produits non détenus")
-
 
 @main_bp.route("/produit/<int:pid>")
 @login_required
@@ -129,7 +113,6 @@ def detail_produit(pid):
     return render_template("detail.html", produit=p, commentaires=commentaires,
                            historique=historique, titre="Fiche produit")
 
-
 @main_bp.route("/produit/<int:pid>/statut", methods=["POST"])
 @login_required
 def update_statut(pid):
@@ -139,16 +122,13 @@ def update_statut(pid):
     if nouveau_statut in ["a_traiter", "en_cours", "traite"]:
         p.statut = nouveau_statut
         db.session.add(HistoriqueAction(
-            produit_id=pid,
-            user_id=current_user.id,
-            username=current_user.username,
-            action="changement_statut",
+            produit_id=pid, user_id=current_user.id,
+            username=current_user.username, action="changement_statut",
             detail=f"{ancien_statut} → {nouveau_statut}"
         ))
         db.session.commit()
         flash(f"Statut mis à jour : {p.statut_label()}", "success")
     return redirect(url_for("main.detail_produit", pid=pid))
-
 
 @main_bp.route("/produit/<int:pid>/commentaire", methods=["POST"])
 @login_required
@@ -156,22 +136,17 @@ def add_commentaire(pid):
     contenu = request.form.get("contenu", "").strip()
     if contenu:
         db.session.add(Commentaire(
-            produit_id=pid,
-            user_id=current_user.id,
-            username=current_user.username,
-            contenu=contenu
+            produit_id=pid, user_id=current_user.id,
+            username=current_user.username, contenu=contenu
         ))
         db.session.add(HistoriqueAction(
-            produit_id=pid,
-            user_id=current_user.id,
-            username=current_user.username,
-            action="commentaire",
+            produit_id=pid, user_id=current_user.id,
+            username=current_user.username, action="commentaire",
             detail=contenu[:100]
         ))
         db.session.commit()
         flash("Commentaire ajouté.", "success")
     return redirect(url_for("main.detail_produit", pid=pid))
-
 
 @main_bp.route("/export")
 @login_required

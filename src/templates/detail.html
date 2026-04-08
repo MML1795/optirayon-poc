@@ -2,7 +2,6 @@
 {% block content %}
 <a href="{{ url_for('main.liste') }}" class="btn btn-secondary" style="margin-bottom:16px">← Retour à la liste</a>
 
-<!-- En-tête produit -->
 <div class="card" style="margin-bottom:20px">
   <div class="card-header">
     📦 {{ produit.libelle or 'Produit #' + produit.id|string }}
@@ -17,7 +16,7 @@
         </div>
       </div>
       <div class="detail-item">
-        <div class="label">Niveau de priorité</div>
+        <div class="label">Priorité</div>
         <div class="value"><span class="badge badge-{{ produit.priorite() }}" style="font-size:16px;padding:6px 16px">{{ produit.priorite()|upper }}</span></div>
       </div>
       <div class="detail-item">
@@ -32,7 +31,6 @@
   </div>
 </div>
 
-<!-- Statut + changement -->
 <div class="card" style="margin-bottom:20px">
   <div class="card-header">🎯 Statut du traitement</div>
   <div class="card-body" style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
@@ -44,21 +42,20 @@
     </div>
     <form method="POST" action="{{ url_for('main.update_statut', pid=produit.id) }}" style="display:flex;gap:8px;flex-wrap:wrap">
       <select name="statut" style="padding:6px 10px;border-radius:4px;border:1px solid #ccc">
-        <option value="a_traiter"  {% if produit.statut=='a_traiter' %}selected{% endif %}>À traiter</option>
-        <option value="en_cours"   {% if produit.statut=='en_cours'  %}selected{% endif %}>En cours</option>
-        <option value="traite"     {% if produit.statut=='traite'    %}selected{% endif %}>Traité</option>
+        <option value="a_traiter" {% if produit.statut=='a_traiter' %}selected{% endif %}>À traiter</option>
+        <option value="en_cours"  {% if produit.statut=='en_cours'  %}selected{% endif %}>En cours</option>
+        <option value="traite"    {% if produit.statut=='traite'    %}selected{% endif %}>Traité</option>
       </select>
       <button type="submit" class="btn btn-primary btn-sm">Mettre à jour</button>
     </form>
   </div>
 </div>
 
-<!-- Variables explicatives -->
 <div class="card" style="margin-bottom:20px">
   <div class="card-header">📊 Variables explicatives du modèle Lasso</div>
   <div class="card-body">
     <table>
-      <thead><tr><th>Variable</th><th>Valeur</th><th>Rôle dans le modèle</th></tr></thead>
+      <thead><tr><th>Variable</th><th>Valeur</th><th>Rôle</th></tr></thead>
       <tbody>
         <tr><td>Nb jours sans ventes</td><td><strong>{{ produit.nb_jours_sans_ventes|int if produit.nb_jours_sans_ventes else '—' }} j</strong></td><td>Durée d'absence en rayon</td></tr>
         <tr><td>Stock UG</td><td><strong>{{ "%.1f"|format(produit.stock_ug) if produit.stock_ug else '—' }}</strong></td><td>Stock en unité de gestion</td></tr>
@@ -71,7 +68,6 @@
   </div>
 </div>
 
-<!-- Commentaires -->
 <div class="card" style="margin-bottom:20px">
   <div class="card-header">💬 Commentaires ({{ commentaires|length }})</div>
   <div class="card-body">
@@ -85,7 +81,6 @@
     {% else %}
     <p style="color:#888;font-size:13px">Aucun commentaire pour l'instant.</p>
     {% endfor %}
-
     <form method="POST" action="{{ url_for('main.add_commentaire', pid=produit.id) }}" style="margin-top:16px">
       <div class="form-group">
         <label style="font-size:12px;font-weight:600;color:#555">Ajouter un commentaire</label>
@@ -98,7 +93,6 @@
   </div>
 </div>
 
-<!-- Historique -->
 <div class="card">
   <div class="card-header">📅 Historique des actions ({{ historique|length }})</div>
   <div class="card-body" style="padding:0">

@@ -1,12 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
 
-<!-- Barre de recherche -->
 <form method="GET" id="form-filtres">
   <div class="search-bar">
     <input type="text" name="search" value="{{ search }}" placeholder="🔍 Rechercher par libellé ou barcode..." class="search-input">
   </div>
-
   <div class="filtres-bar">
     <div class="filtre-group">
       <label>Rayon</label>
@@ -30,9 +28,9 @@
       <label>Statut</label>
       <select name="statut">
         <option value="">Tous</option>
-        <option value="a_traiter"  {% if statut_filtre=='a_traiter' %}selected{% endif %}>À traiter</option>
-        <option value="en_cours"   {% if statut_filtre=='en_cours'  %}selected{% endif %}>En cours</option>
-        <option value="traite"     {% if statut_filtre=='traite'    %}selected{% endif %}>Traité</option>
+        <option value="a_traiter" {% if statut_filtre=='a_traiter' %}selected{% endif %}>À traiter</option>
+        <option value="en_cours"  {% if statut_filtre=='en_cours'  %}selected{% endif %}>En cours</option>
+        <option value="traite"    {% if statut_filtre=='traite'    %}selected{% endif %}>Traité</option>
       </select>
     </div>
     <div class="filtre-group">
@@ -106,12 +104,10 @@
 {% endif %}
 
 <script>
-// Mise à jour dynamique des familles selon le rayon sélectionné
 function updateFamilles() {
   const rayon = document.getElementById('select-rayon').value;
   const famSelect = document.getElementById('select-famille');
   const currentFam = "{{ famille_filtre }}";
-
   fetch('/api/familles?rayon=' + encodeURIComponent(rayon))
     .then(r => r.json())
     .then(familles => {
